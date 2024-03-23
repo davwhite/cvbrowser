@@ -22,9 +22,23 @@ async def post_file_and_get_results(file: UploadFile):
     except RequestException as e:
         return {"error": f"Error processing file: {e}"}, None
 
+get_images_url = "https://model-yolo-ml-demo.apps.ocpbare.davenet.local/uploads/get"
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    content = """
+    # Fetch list of images
+    try:
+        response = requests.get(get_images_url, verify=False)
+        response.raise_for_status()
+        data = response.json()
+        images = data.get("images", [])
+        # Generate links for images
+        image_links = [f'<a href="{get_images_url}/image/{image}">{image}</a><br>' for image in images]
+        image_links_str = "\n".join(image_links)
+    except requests.RequestException as e:
+        image_links_str = f"Error fetching images: {e}"
+
+    content = f"""
         <html>
         <head>
             <title>Upload File</title>
@@ -37,6 +51,8 @@ async def index(request: Request):
                     <input type="file" name="file" accept=".jpeg,.jpg,.png">
                     <input type="submit" value="Upload File">
                 </form>
+                <h2>Images:</h2>
+                {image_links_str}
             </div>
         </body>
         </html>
