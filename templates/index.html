@@ -1,0 +1,26 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload JPEG File</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Upload JPEG File</h1>
+        </header>
+        <main>
+            <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".jpeg,.jpg">
+                <button type="submit">Upload</button>
+            </form>
+        </main>
+        <footer>
+            <p>&copy; 2024 Your Company</p>
+        </footer>
+    </div>
+</body>
+</html>
