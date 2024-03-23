@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ml-demo
+  name: 'cvbrowser'
+spec:
+  selector:
+    matchLabels:
+      app: cvbrowser
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cvbrowser
+    spec:
+      containers:
+        - name: container
+          env:
+            - name: DETECT_URL
+              value: "https://model-yolo-ml-demo.apps.ocpbare.davenet.local/detect"
+            - name: GET_IMAGE_URL
+              value: "https://model-yolo-ml-demo.apps.ocpbare.davenet.local/uploads/get/image"
+            - name: GET_IMAGES_URL
+              value: "https://model-yolo-ml-demo.apps.ocpbare.davenet.local/uploads/get"
+          image: >-
+            nexus.davenet.local:8082/davenet/cvbrowser:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cvbrowser-service
+spec:
+  selector:
+    app: cvbrowser
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+ ---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: cvbrowser-rt
+  namespace: ml-demo
+spec:
+  to:
+    kind: Service
+    name: cvbrowser-service
+    weight: 100
+  port:
+    targetPort: 8000
+  wildcardPolicy: None
