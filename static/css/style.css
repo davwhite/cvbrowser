@@ -51,3 +51,7 @@ footer {
     color: #666;
     margin-top: 20px;
 }
+
+.result-image {
+    max-width: 800px;
+}
