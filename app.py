@@ -3,12 +3,15 @@ from fastapi.responses import HTMLResponse, FileResponse
 import requests
 from requests.exceptions import RequestException
 import os
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = FastAPI()
 
 # URLs
-detect_url = "https://model-yolo-ml-demo.apps.ocpbare.davenet.local/detect"
-get_image_url = "https://model-yolo-ml-demo.apps.ocpbare.davenet.local/uploads/get/image"
+detect_url = os.environ.get("DETECT_URL")
+get_image_url = os.environ.get("GET_IMAGE_URL")
+get_images_url = os.environ.get("GET_IMAGES_URL")
 
 # Directory for static files
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
@@ -21,8 +24,6 @@ async def post_file_and_get_results(file: UploadFile):
         return response.json(), file.filename
     except RequestException as e:
         return {"error": f"Error processing file: {e}"}, None
-
-get_images_url = "https://model-yolo-ml-demo.apps.ocpbare.davenet.local/uploads/get"
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -109,4 +110,4 @@ async def serve_static(filepath: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
