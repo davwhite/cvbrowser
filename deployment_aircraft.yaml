@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ml-demo
+  name: 'cvbrowser-aircraft'
+spec:
+  selector:
+    matchLabels:
+      app: cvbrowser-aircraft
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cvbrowser-aircraft
+    spec:
+      containers:
+        - name: container
+          env:
+            - name: DETECT_URL
+              value: "https://model-flyingthings-ml-demo.apps.ocpbare.davenet.local/detect"
+            - name: GET_IMAGE_URL
+              value: "https://model-flyingthings-ml-demo.apps.ocpbare.davenet.local/uploads/get/image"
+            - name: GET_IMAGES_URL
+              value: "https://model-flyingthings-ml-demo.apps.ocpbare.davenet.local/uploads/get"
+          image: >-
+            nexus.davenet.local:8082/davenet/cvbrowser:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cvbrowser-aircraft-svc
+spec:
+  selector:
+    app: cvbrowser-aircraft
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: cvbrowser-aircraft-rt
+  namespace: ml-demo
+spec:
+  to:
+    kind: Service
+    name: cvbrowser-aircraft-svc
+    weight: 100
+  port:
+    targetPort: 8000
+  wildcardPolicy: None
